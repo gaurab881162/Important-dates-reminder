@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6d5ce7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Important Dates">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Important Dates Reminder</title>
+<style>
+:root{--bg:#f6f5fb;--card:#fff;--ink:#24223a;--muted:#716f86;--accent:#6d5ce7;--line:#e8e5f2;--pink:#fff0f4;--green:#eaf8f0}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+header{padding:28px 18px 22px;background:linear-gradient(135deg,#6d5ce7,#a46be8);color:white;border-radius:0 0 26px 26px}
+.wrap{max-width:760px;margin:auto;padding:0 14px 36px}
+h1{font-size:26px;margin:0 0 7px}header p{margin:0;opacity:.9;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}
+.stat{background:#ffffff20;border:1px solid #ffffff35;border-radius:15px;padding:12px 10px}
+.stat strong{display:block;font-size:22px}.stat span{font-size:12px;opacity:.9}
+main{margin-top:16px}.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 4px 18px #31205d08}
+h2{font-size:18px;margin:0 0 13px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+input,select,textarea{width:100%;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:11px;padding:11px;background:#fff;color:var(--ink)}
+textarea{resize:vertical;min-height:70px}.full{grid-column:1/-1}
+button{font:inherit;border:0;border-radius:12px;padding:12px 15px;cursor:pointer;font-weight:650}
+.primary{background:var(--accent);color:white;width:100%;margin-top:12px}.secondary{background:#f0eefb;color:var(--accent)}.danger{background:#fff0f0;color:#b63838;padding:8px 10px;font-size:13px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.toolbar input{flex:1;min-width:150px}
+.item{display:flex;gap:12px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0;padding-bottom:0}
+.datebox{min-width:56px;text-align:center;border-radius:13px;background:var(--pink);padding:8px 5px;color:#9d3d68}.datebox b{display:block;font-size:20px}.datebox small{font-size:10px;font-weight:750;text-transform:uppercase}
+.details{flex:1;min-width:0}.details strong{display:block;font-size:15px;overflow-wrap:anywhere}.sub{color:var(--muted);font-size:12px;margin-top:4px}.count{font-size:12px;color:var(--accent);font-weight:700;margin-top:6px}
+.empty{text-align:center;color:var(--muted);padding:20px 8px;font-size:14px}
+.note{font-size:12px;line-height:1.5;color:var(--muted);background:#f8f7fc;border-radius:12px;padding:11px;margin-top:12px}
+.pill{display:inline-block;font-size:10px;padding:4px 7px;border-radius:20px;background:var(--green);color:#24764a;margin-left:5px}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:8px}
+@media(max-width:480px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.stats{gap:7px}.stat{padding:10px 8px}.stat strong{font-size:19px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="wrap" style="padding-bottom:0">
+  <h1>🎂 Important Dates</h1>
+  <p>Never miss a birthday, anniversary, or special day.</p>
+  <div class="stats">
+   <div class="stat"><strong id="totalStat">0</strong><span>Saved dates</span></div>
+   <div class="stat"><strong id="todayStat">0</strong><span>Today</span></div>
+   <div class="stat"><strong id="weekStat">0</strong><span>Next 7 days</span></div>
+  </div>
+ </div>
+</header>
+<div class="wrap">
+<main>
+ <section class="panel">
+  <h2 id="formTitle">Add an important date</h2>
+  <form id="dateForm">
+   <input type="hidden" id="editId">
+   <div class="grid">
+    <div><label for="person">Person / event name *</label><input id="person" required maxlength="80" placeholder="e.g. Ramesh"></div>
+    <div><label for="kind">Type</label><select id="kind"><option>Birthday</option><option>Anniversary</option><option>Other</option></select></div>
+    <div><label for="date">Date *</label><input id="date" type="date" required></div>
+    <div><label for="remind">Remind me</label><select id="remind"><option value="0">On the day</option><option value="1">1 day before</option><option value="3" selected>3 days before</option><option value="7">7 days before</option></select></div>
+    <div class="full"><label for="notes">Notes (optional)</label><textarea id="notes" maxlength="300" placeholder="Gift idea, relationship, message…"></textarea></div>
+   </div>
+   <button class="primary" type="submit" id="saveBtn">Save date</button>
+   <button class="secondary" type="button" id="cancelEdit" style="display:none;width:100%;margin-top:8px">Cancel edit</button>
+  </form>
+  <div class="note"><b>Privacy:</b> your entries are stored in this browser on this device. They are not uploaded to a server. Export a backup regularly if these dates are important.</div>
+ </section>
+ <section class="panel">
+  <h2>Upcoming dates</h2>
+  <div class="toolbar">
+   <input id="search" placeholder="Search names…" aria-label="Search names">
+   <select id="filter" aria-label="Filter dates" style="max-width:160px"><option value="all">All types</option><option>Birthday</option><option>Anniversary</option><option>Other</option></select>
+  </div>
+  <div id="list"></div>
+ </section>
+ <section class="panel">
+  <h2>Backup & notifications</h2>
+  <div class="toolbar">
+   <button class="secondary" id="exportBtn">Export backup</button>
+   <button class="secondary" id="importBtn">Import backup</button>
+   <input type="file" id="importFile" accept="application/json,.json" hidden>
+  </div>
+  <button class="secondary" id="notifyBtn" style="width:100%">Enable browser notifications</button>
+  <div class="note">Important: this first version can show browser notifications only when the app is open and the browser permits them. It does <b>not</b> reliably schedule background notifications on iPhone. For dependable iPhone reminders while the app is closed, a native iOS build or a properly hosted web-push setup is needed.</div>
+ </section>
+</main>
+<footer>Important Dates Reminder · First prototype</footer>
+</div>
+<script>
+const KEY='important-dates-reminder-v1';
+let entries=load();
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return []}}
+function persist(){localStorage.setItem(KEY,JSON.stringify(entries));render()}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function parseDate(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d,12)}
+function nextOccurrence(entry,now=new Date()){
+ const [y,m,d]=entry.date.split('-').map(Number);
+ let year=now.getFullYear();
+ let candidate=new Date(year,m-1,d,12);
+ // Handle Feb 29 birthdays in non-leap years by using Feb 28.
+ if(m===2&&d===29&&candidate.getMonth()!==1) candidate=new Date(year,1,28,12);
+ const today=new Date(now.getFullYear(),now.getMonth(),now.getDate(),12);
+ if(candidate<today){year++;candidate=new Date(year,m-1,d,12);if(m===2&&d===29&&candidate.getMonth()!==1)candidate=new Date(year,1,28,12)}
+ return candidate;
+}
+function daysBetween(a,b){return Math.round((new Date(b.getFullYear(),b.getMonth(),b.getDate())-new Date(a.getFullYear(),a.getMonth(),a.getDate()))/86400000)}
+function fmt(d){return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}
+function initialsDate(d){return {day:d.getDate(),month:d.toLocaleDateString(undefined,{month:'short'})}}
+function render(){
+ const now=new Date(); const today=new Date(now.getFullYear(),now.getMonth(),now.getDate(),12);
+ const all=entries.map(e=>({...e,next:nextOccurrence(e,now)})).sort((a,b)=>a.next-b.next);
+ const todayCount=all.filter(e=>daysBetween(today,e.next)===0).length;
+ const weekCount=all.filter(e=>daysBetween(today,e.next)<=7).length;
+ document.getElementById('totalStat').textContent=entries.length;
+ document.getElementById('todayStat').textContent=todayCount;
+ document.getElementById('weekStat').textContent=weekCount;
+ const q=document.getElementById('search').value.toLowerCase().trim(), f=document.getElementById('filter').value;
+ const filtered=all.filter(e=>(!q||(e.person+' '+e.kind+' '+(e.notes||'')).toLowerCase().includes(q))&&(f==='all'||e.kind===f));
+ const list=document.getElementById('list');
+ if(!filtered.length){list.innerHTML='<div class="empty">No dates yet. Add a birthday or anniversary above. 💜</div>';return}
+ list.innerHTML=filtered.map(e=>{
+  const dd=initialsDate(e.next), n=daysBetween(today,e.next);
+  const when=n===0?'Today 🎉':n===1?'Tomorrow':`In ${n} days`;
+  const note=e.notes?`<div class="sub">${esc(e.notes)}</div>`:'';
+  return `<div class="item"><div class="datebox"><b>${dd.day}</b><small>${esc(dd.month)}</small></div><div class="details"><strong>${esc(e.person)} <span class="pill">${esc(e.kind)}</span></strong><div class="sub">${fmt(e.next)} · Reminder ${e.remind===0?'on the day':`${e.remind} day(s) before`}</div><div class="count">${when}</div>${note}<div class="toolbar" style="margin:8px 0 0"><button class="secondary" onclick="editEntry('${e.id}')">Edit</button><button class="danger" onclick="deleteEntry('${e.id}')">Delete</button></div></div></div>`;
+ }).join('');
+}
+document.getElementById('dateForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ const id=document.getElementById('editId').value||String(Date.now())+Math.random().toString(16).slice(2);
+ const item={id,person:document.getElementById('person').value.trim(),kind:document.getElementById('kind').value,date:document.getElementById('date').value,remind:Number(document.getElementById('remind').value),notes:document.getElementById('notes').value.trim()};
+ if(!item.person||!item.date)return;
+ const i=entries.findIndex(x=>x.id===id);if(i>=0)entries[i]=item;else entries.push(item);
+ resetForm();persist();
+});
+function editEntry(id){const e=entries.find(x=>x.id===id);if(!e)return;document.getElementById('editId').value=e.id;document.getElementById('person').value=e.person;document.getElementById('kind').value=e.kind;document.getElementById('date').value=e.date;document.getElementById('remind').value=String(e.remind);document.getElementById('notes').value=e.notes||'';document.getElementById('formTitle').textContent='Edit important date';document.getElementById('saveBtn').textContent='Save changes';document.getElementById('cancelEdit').style.display='block';window.scrollTo({top:0,behavior:'smooth'})}
+function deleteEntry(id){const e=entries.find(x=>x.id===id);if(e&&confirm(`Delete ${e.person}'s date?`)){entries=entries.filter(x=>x.id!==id);persist()}}
+function resetForm(){document.getElementById('dateForm').reset();document.getElementById('editId').value='';document.getElementById('formTitle').textContent='Add an important date';document.getElementById('saveBtn').textContent='Save date';document.getElementById('cancelEdit').style.display='none'}
+document.getElementById('cancelEdit').onclick=resetForm;
+document.getElementById('search').addEventListener('input',render);
+document.getElementById('filter').addEventListener('change',render);
+document.getElementById('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(entries,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='important-dates-backup.json';a.click();URL.revokeObjectURL(a.href)};
+document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
+document.getElementById('importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const data=JSON.parse(await f.text());if(!Array.isArray(data)||!data.every(x=>x.person&&x.date&&x.kind))throw Error('Invalid backup');if(confirm('Replace current saved dates with this backup?')){entries=data;persist();alert('Backup imported.')}}catch(err){alert('Could not import this file. Please choose a valid backup.')}e.target.value=''};
+document.getElementById('notifyBtn').onclick=async()=>{if(!('Notification'in window)){alert('This browser does not support notifications.');return}try{const p=await Notification.requestPermission();if(p==='granted'){new Notification('Important Dates',{body:'Browser notifications are enabled while this app is active.'});alert('Permission granted. Background reminders are not scheduled in this prototype.')}else alert('Notification permission was not granted.')}catch(err){alert('Notifications may require HTTPS or an installed web app.')}}
+render();
+
+// Register the service worker so the hosted app can be cached for repeat visits.
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(err => {
+      console.warn('Service worker registration failed:', err);
+    });
+  });
+}
+</script>
+</body>
+</html>
